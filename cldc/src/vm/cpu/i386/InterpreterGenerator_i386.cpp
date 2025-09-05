@@ -796,7 +796,7 @@ void InterpreterGenerator::generate_interpreter_bytecode_template(Template* t, b
 
   // Generate call to runtime system to trace bytecodes.
   if (TraceBytecodes) {
-    Label(skip);
+    Label skip;
     cmpl(Address(Constant("TraceBytecodes")), Constant(0));
     jcc(zero, Constant(skip));
     interpreter_call_vm(Constant("trace_bytecode"), T_VOID);

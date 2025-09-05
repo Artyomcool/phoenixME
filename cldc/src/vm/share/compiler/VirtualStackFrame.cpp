@@ -954,8 +954,11 @@ class TransferGraph : public StackObj {
 
   void set_mark(Register reg, Mark mark) {
     GUARANTEE((mark & ~NODE_MARK_MASK) == 0, "Sanity");
+      _Pragma("GCC diagnostic push")                     \
+      _Pragma("GCC diagnostic ignored \"-Wstringop-overflow\"") \
     _flags[reg] &= ~NODE_MARK_MASK;
     _flags[reg] |= mark;
+      _Pragma("GCC diagnostic pop")                      \
   }
 
 #define DEFINE_SETTER(name)                                  \
@@ -965,7 +968,10 @@ class TransferGraph : public StackObj {
               mark(reg) == zero_mark, "Already marked");     \
     GUARANTEE((_flags[reg] & name ## _mark) == 0,            \
               "Already marked");                             \
+      _Pragma("GCC diagnostic push")                     \
+      _Pragma("GCC diagnostic ignored \"-Wstringop-overflow\"") \
     _flags[reg] |= name ## _mark;                            \
+      _Pragma("GCC diagnostic pop")                      \
   }
 
   FOR_ALL_NODE_PROPERTIES(DEFINE_SETTER)
@@ -975,7 +981,10 @@ class TransferGraph : public StackObj {
 #define DEFINE_UNSETTER(name)                 \
   void unset_ ## name(Register reg) {         \
     check_register(reg);                      \
+      _Pragma("GCC diagnostic push")                     \
+      _Pragma("GCC diagnostic ignored \"-Wstringop-overflow\"") \
     _flags[reg] &= ~name ## _mark;            \
+      _Pragma("GCC diagnostic pop")                      \
   }
 
   FOR_ALL_NODE_PROPERTIES(DEFINE_UNSETTER)

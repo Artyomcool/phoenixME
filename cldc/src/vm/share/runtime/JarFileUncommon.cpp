@@ -33,7 +33,7 @@ extern "C" void
 Jvm_read_jar_entry(const JvmPathChar* jar_file_name, const char* entry_name, 
                    jobject entry) {
    SETUP_ERROR_CHECKER_ARG;
-   UsingFastOops fast_oops;
+   UsingFastOops fast_oops = UsingFastOops();
    JarFileParser::Fast parser = JarFileParser::get(jar_file_name JVM_NO_CHECK);
    if (parser.not_null()) {
      bool found = parser().find_entry(entry_name JVM_MUST_SUCCEED);
@@ -59,7 +59,7 @@ jboolean Jvm_inflate(void *data, JvmGetByteProc getByteProc,
                      int decompLen)
 {  
   SETUP_ERROR_CHECKER_ARG;
-  UsingFastOops fast_oops;
+  UsingFastOops fast_oops = UsingFastOops();
 
   Inflater::Fast inflater = Inflater::allocate(NULL, 0, decompLen, compLen, 0,
                                                0 JVM_NO_CHECK);

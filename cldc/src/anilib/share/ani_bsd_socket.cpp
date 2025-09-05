@@ -37,15 +37,15 @@
  * suit your platform.
  */
 
-#if defined(LINUX) || defined (CYGWIN)
-#define USE_UNISTD_SOCKETS 1
-#else
-#if defined(WIN32) || defined(UNDER_CE)
+//#if defined(LINUX) || defined (CYGWIN)
+//#define USE_UNISTD_SOCKETS 1
+//#else
+//#if defined(WIN32) || defined(UNDER_CE)
 #define USE_WINSOCK_SOCKETS 1
-#else
-#error "Unknown sockets type"
-#endif
-#endif
+//#else
+//#error "Unknown sockets type"
+//#endif
+//#endif
 
 #if USE_UNISTD_SOCKETS
 #include <unistd.h>
@@ -69,6 +69,9 @@
 #include <winsock.h>
 
 #define GET_LAST_ERROR()        WSAGetLastError()
+#ifdef  EWOULDBLOCK
+#undef  EWOULDBLOCK
+#endif
 #define EWOULDBLOCK             WSAEWOULDBLOCK
 
 #ifdef  EINPROGRESS

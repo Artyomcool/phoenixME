@@ -36,7 +36,7 @@
 #endif
 
 // We use BSDSocket.cpp to implement sockets on this platform
-#define USE_BSD_SOCKET 1
+#define USE_BSD_SOCKET 0
 
 // The Win32 port supports TIMER_THREAD but not TIMER_INTERRUPT
 #define SUPPORTS_TIMER_THREAD        1

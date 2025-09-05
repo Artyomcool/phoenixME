@@ -36,9 +36,5 @@
 typedef signed char jbyte;
 typedef int         jint;
 
-#ifndef LINUX
-typedef __int64     jlong;
-#else
 typedef long long jlong;
-#endif
 #endif /* !_JAVASOFT_KNI_MD_H_ */

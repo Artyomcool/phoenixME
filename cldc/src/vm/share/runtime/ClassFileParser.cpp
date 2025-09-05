@@ -710,7 +710,7 @@ inline bool ClassFileParser::are_valid_method_access_flags(
       //
       //if (!class_access_flags.is_abstract()) {
       //  //abstract methods must be declared in an abstract class, 
-      //  //   JVMS §2.10.3
+      //  //   JVMS ï¿½2.10.3
       //  return false;
       //}
       if( flags & JVM_ACC_STRICT ) {

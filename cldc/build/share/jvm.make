@@ -107,7 +107,7 @@ endif
 -include $(SHARE_DIR)/product.make
 
 ifndef PRODUCT_NAME
-PRODUCT_NAME        = phoneME Feature VM
+PRODUCT_NAME        = phoenixME VM
 endif
 
 ifndef RELEASE_VERSION
@@ -178,7 +178,7 @@ PATHSEP_solaris      = :
 PATHSEP              = ${PATHSEP_$(host_os)}
 
 ROMGEN               = romgen$(HOST_EXE_SUFFIX)
-ROM_GENERATOR        = ../../romgen/app/$(ROMGEN)
+ROM_GENERATOR        = $(abspath ../../romgen/app/$(ROMGEN))
 
 ifndef ROM_CONFIG_FILE
 ROM_CONFIG_FILE = $(WorkSpace)/src/vm/cldctest_rom.cfg
@@ -221,7 +221,7 @@ ifeq ($(ENABLE_C_INTERPRETER), true)
 Obj_Files           +=         AsmStubs_$(target_arch)$(OBJ_SUFFIX)
 endif
 
-LOOP_GENERATOR       = ../../loopgen/app/loopgen$(HOST_EXE_SUFFIX)
+LOOP_GENERATOR       = $(abspath ../../loopgen/app/loopgen$(HOST_EXE_SUFFIX))
 
 ifeq ($(MAKE_DETERMINISTIC), true)
 DETERMINISTIC_FLAG   = +Deterministic
@@ -1829,7 +1829,7 @@ GCC_PREFIX_arm     = $(GNU_TOOLS_DIR)/bin/
 GCC_PREFIX_sh      = $(GNU_TOOLS_DIR)/bin/
 GCC_PREFIX_mips    = $(GNU_TOOLS_DIR)/bin/
 GCC_PREFIX_thumb2  = $(GNU_TOOLS_DIR)/bin/
-GCC_PREFIX_i386    =
+GCC_PREFIX_i386    = i686-w64-mingw32-
 GCC_PREFIX_sparc   =
 GCC_PREFIX_powerpc =
 GCC_PREFIX_c       = $(GCC_PREFIX_$(target_arch))
@@ -1896,21 +1896,12 @@ endif
 endif
 
 ifndef SUPPORTS_MONOTONIC_CLOCK
-SUPPORTS_MONOTONIC_CLOCK := \
-  $(shell TESTFILE="`mktemp`.c" && \
-    echo "\#include <time.h>"                     >  $$TESTFILE && \
-    echo ""                                       >> $$TESTFILE && \
-    echo "int main(void) {"                       >> $$TESTFILE && \
-    echo "  struct timespec tp;"                  >> $$TESTFILE && \
-    echo "  clock_gettime(CLOCK_MONOTONIC, &tp);" >> $$TESTFILE && \
-    echo "}"                                      >> $$TESTFILE && \
-    $(CC_gcc) -o /dev/null -lrt $$TESTFILE 2> /dev/null && \
-    echo true || echo false; rm $$TESTFILE)
+SUPPORTS_MONOTONIC_CLOCK := true
 export SUPPORTS_MONOTONIC_CLOCK__BY = jvm.make
 endif
 
 ifeq ($(SUPPORTS_MONOTONIC_CLOCK), true)
-LINK_FLAGS             += -lrt
+LINK_FLAGS             += 
 CPP_DEF_FLAGS          += -DSUPPORTS_MONOTONIC_CLOCK=1
 else
 CPP_DEF_FLAGS          += -DSUPPORTS_MONOTONIC_CLOCK=0
@@ -1953,6 +1944,7 @@ CPP_OPT_FLAGS_release   +=
 CPP_OPT_FLAGS_debug     +=
 CPP_OPT_FLAGS_product   +=
 CPP_OPT_FLAGS           += $(CPP_OPT_FLAGS_$(BUILD))
+CPP_OPT_FLAGS           += -std=gnu++98 -Wno-write-strings
 
 CPP_DEF_FLAGS_debug      = -D_DEBUG -DAZZERT
 CPP_DEF_FLAGS_release    =
@@ -2018,7 +2010,7 @@ LINK_FLAGS             += -lpthread
 endif
 
 # We want to link for 32-bit systems
-LINK_FLAGS             += -m32
+LINK_FLAGS             += -m32 -static -static-libgcc -static-libstdc++
 
 ifeq ($(ENABLE_PCSL), true)
 PCSL_LIBS               = $(PCSL_DIST_DIR)/lib/libpcsl_memory.a  \

@@ -183,6 +183,11 @@ public abstract class Platform {
     /* A platform may use this to process the name of a file. E.g., Symbian
      * strips leading DOS drive names */
     public String translateFileName(String name) {
+        int index = name.indexOf(":");
+        if (index != -1) {
+            return "/cygdrive/" + name.substring(0, index) +
+                name.substring(index + 1);
+        }
         return name;
     }
 

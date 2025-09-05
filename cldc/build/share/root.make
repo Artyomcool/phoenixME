@@ -85,19 +85,7 @@ GEN_DIR    = ../generated
 CLASSES    = $(JVMBuildSpace)/classes
 CLDC_ZIP   = $(JVMBuildSpace)/classes.zip
 
-ifeq ($(ENABLE_CLDC_111), true)
 CLDC_LIB   = cldc1.1.1
-else
-ifeq ($(ENABLE_EXTENDED_API),true)
-CLDC_LIB   = cldc1.1plus
-else
-ifneq ($(ENABLE_CLDC_11), false)
-CLDC_LIB   = cldc1.1
-else
-CLDC_LIB   = cldc1.0
-endif
-endif
-endif
 
 # By default the Romizer runs in debug mode, which runs more slowly
 # but performs more checks to ensure a healthy ROM image. If speed of
@@ -558,7 +546,7 @@ sanity:
 	    echo '==========================================================';\
 	    exit -1; \
 	fi
-	$(A)if test ! -f $(JDK_DIR)/jre/lib/rt.jar && test ! -d /System/Library/Java; then \
+	$(A)if test ! -f $(JDK_DIR)/bin/javac; then \
 	    echo '==========================================================';\
 	    echo 'JDK_DIR must be set. I.e., set it such that you can access';\
 	    echo 'javac as $$(JDK_DIR)/bin/javac'; \

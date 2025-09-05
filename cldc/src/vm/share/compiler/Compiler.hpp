@@ -520,7 +520,9 @@ class Compiler: public BytecodeCompileClosure {
   }
 
   static void oops_do( void do_oop(OopDesc**) ) {
-    _compiler_state->oops_do( do_oop );
+    if (_compiler_state != NULL) {
+      _compiler_state->oops_do( do_oop );
+    }
   }
 
 #if ENABLE_PERFORMANCE_COUNTERS && ENABLE_DETAILED_PERFORMANCE_COUNTERS

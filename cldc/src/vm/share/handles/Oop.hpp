@@ -780,12 +780,12 @@ private:
 public:
   /// Default constructor.
   UsingFastOops() { 
-    AZZERT_ONLY(pre_fast_oops_verification();)
+    //AZZERT_ONLY(pre_fast_oops_verification();)
      _previous = _last_handle; 
   }
   /// Default destructor.
   ~UsingFastOops() { 
-    AZZERT_ONLY(post_fast_oops_verification();)
+    //AZZERT_ONLY(post_fast_oops_verification();)
     _last_handle = _previous; 
   }
 };

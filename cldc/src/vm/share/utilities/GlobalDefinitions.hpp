@@ -45,6 +45,7 @@
  * Rename internal classes to avoid conflicts with
  * customers class names.
  */
+/*
 #define AccessFlags  JVMAccessFlags
 #define AllStatic  JVMAllStatic
 #define AllocationDisabler  JVMAllocationDisabler
@@ -480,6 +481,7 @@
 #define WeakRefArray  JVMWeakRefArray
 #define WeakReference  JVMWeakReference
 #define ZeroDivisorCheckStub  JVMZeroDivisorCheckStub
+*/
 
 
 //----------------------------------------------

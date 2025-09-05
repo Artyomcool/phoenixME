@@ -45,15 +45,15 @@ extern "C" {
 
 #if USE_BSD_SOCKET
 
-#if defined(LINUX) || defined (CYGWIN)
-#define USE_UNISTD_SOCKETS 1
-#else
-#if defined(WIN32) || defined(UNDER_CE)
+//#if defined(LINUX) || defined (CYGWIN)
+//#define USE_UNISTD_SOCKETS 1
+//#else
+//#if defined(WIN32) || defined(UNDER_CE)
 #define USE_WINSOCK_SOCKETS 1
-#else
-#error "Unknown sockets type"
-#endif
-#endif
+//#else
+//#error "Unknown sockets type"
+//#endif
+//#endif
 
 #if USE_UNISTD_SOCKETS
 #include <unistd.h>
@@ -82,7 +82,10 @@ extern "C" {
 #include <winsock.h>
 
 #define GET_LAST_ERROR()        WSAGetLastError()
+#ifdef  EWOULDBLOCK
+#undef  EWOULDBLOCK
 #define EWOULDBLOCK             WSAEWOULDBLOCK
+#endif
 #ifdef  EINPROGRESS
 #undef  EINPROGRESS
 #endif

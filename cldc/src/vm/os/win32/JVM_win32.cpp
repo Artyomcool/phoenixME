@@ -66,7 +66,7 @@ static void SigBreakHandler(int junk) {
 
 #define EXCEPTION_CASE(c) case c: name = #c;
 #define PRINT_REGISTER(x) \
-    printf("Register %6s = 0x%8x\n", #x, exptr->ContextRecord->x)
+    printf("Register %6s = 0x%8x\n", #x, (unsigned int)exptr->ContextRecord->x)
 
 #endif // !PRODUCT
 

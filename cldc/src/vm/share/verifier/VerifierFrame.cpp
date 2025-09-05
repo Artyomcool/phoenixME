@@ -147,14 +147,14 @@ void VerifierFrame::pop_ref(StackMapKind& kind, Symbol* name JVM_TRAPS) {
 
 void VerifierFrame::pop_ref(JVM_SINGLE_ARG_TRAPS) {
   UsingFastOops fast_oops;
-  StackMapKind kind_dummy;
+  StackMapKind kind_dummy = ITEM_Bogus;
   Symbol::Fast name_dummy;
   pop_ref(kind_dummy, &name_dummy JVM_NO_CHECK_AT_BOTTOM);
 }
 
 void VerifierFrame::pop_object(Symbol* name JVM_TRAPS) {
   UsingFastOops fast_oops;
-  StackMapKind kind;
+  StackMapKind kind = ITEM_Bogus;
   Symbol::Fast stack_name;
   pop_category1(kind, &stack_name JVM_CHECK);
   switch(kind) {

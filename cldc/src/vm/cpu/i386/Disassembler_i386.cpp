@@ -260,10 +260,10 @@ x86_disassembler::disassemble()
 {
   const struct instable *dp;
   int wbit, vbit;
-  unsigned mode, reg, r_m;
+  unsigned mode=0, reg=0, r_m=0;
 
   // nibbles of the opcode
-  unsigned opcode1, opcode2, opcode3, opcode4, opcode5;
+  unsigned opcode1=0, opcode2=0, opcode3=0, opcode4=0, opcode5=0;
   long    lngval;
   const char *reg_name = NULL;
   int got_modrm_byte;

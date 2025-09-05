@@ -79,13 +79,15 @@ class BinaryAssembler: public BinaryAssemblerCommon {
     Address(int disp) : 
       _disp  (disp),
       _base  (no_reg),
-      _index (no_reg)
+      _index (no_reg),
+      _scale (no_scale)
     { }
 
     Address(Register base, int disp = 0) :
       _disp  (disp),
       _base  (base),
-      _index (no_reg)
+      _index (no_reg),
+      _scale (no_scale)
     { }
 
     Address(Register base, Register index, const ScaleFactor& scale, int disp = 0) :
