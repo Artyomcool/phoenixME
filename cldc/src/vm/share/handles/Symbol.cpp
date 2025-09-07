@@ -123,7 +123,7 @@ void Symbol::print_symbol_on(Stream* st, bool dottified) {
                          : (b == '\n')             ?  "\\n"
                          : (b == '\t')             ?  "\\t"
                          : (b == '/' && dottified) ?  "."
-                         : (isprint(b))            ?  "%c"
+                         : (b >= 0x20 && b <= 0x7E)?  "%c"
                          :                            "\\x%02x";
       st->print(format, b);
     } else {

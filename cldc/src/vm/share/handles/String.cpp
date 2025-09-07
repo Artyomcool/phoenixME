@@ -89,7 +89,7 @@ void String::print_string_on(Stream* st, int max_len) const {
   for (; index < end_index; index++) {
     jchar c =  t().char_at(index);
     const char *format = (c == '"')                ? "\\\""
-                       : (c <= 0xFF && isprint(c)) ? "%c"
+                       : (c >= 0x20 && c <= 0x7E)  ? "%c"
                        : (c == '\n')               ? "\\n"
                        : (c == '\t')               ? "\\t"
                        :                           "\\u%04x";
