@@ -28,6 +28,8 @@ package java.lang;
 
 import java.io.*;
 import com.sun.cldchi.io.*;
+import com.sun.cldchi.jvm.JVM;
+
 import java.security.*;
 import java.util.PropertyPermission;
 
@@ -313,4 +315,8 @@ public final class System {
      * quick native methods.
      */
     private static native void quickNativeThrow();
+
+    public static void loadLibrary(String libName) {
+        JVM.loadLibrary(libName);
+    }
 }

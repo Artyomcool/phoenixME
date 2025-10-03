@@ -49,6 +49,9 @@
   template(tag_exceptions,         "Exceptions")                            \
   template(tag_stackmap,           "StackMap")                              \
   template(tag_synthetic,          "Synthetic")                             \
+  template(tag_runtime_annotations,"RuntimeVisibleAnnotations")             \
+  template(tag_runtime_parameter_annotations,                               \
+                                   "RuntimeVisibleParameterAnnotations")    \
   /* ---- Exception classes: all exceptions thrown by the VM ---- */        \
   template(java_lang_Error,        "java/lang/Error")                       \
   template(java_lang_RuntimeException,                                      \

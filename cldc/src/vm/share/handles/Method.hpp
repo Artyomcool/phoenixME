@@ -156,6 +156,9 @@ class Method: public Oop {
     return FIELD_OFFSET(MethodDesc, _line_var_table);
   }
 #endif
+  static int annotations_offset() {
+    return FIELD_OFFSET(MethodDesc, _annotations);
+  }
 
  private:
   int bc_offset_for(const int bci) const {
@@ -308,6 +311,13 @@ public:
   ReturnOop exception_table() const;
   void set_exception_table(Oop* value) {
     obj_field_put(exception_table_offset(), value);
+  }
+
+  ReturnOop annotations() const {
+    return obj_field(annotations_offset());
+  }
+  void set_annotations(Oop* value) {
+    obj_field_put(annotations_offset(), value);
   }
 
 #if USE_REFLECTION

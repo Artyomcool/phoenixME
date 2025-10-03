@@ -2700,6 +2700,11 @@ void Method::iterate(OopVisitor* visitor) {
   }
 #endif
 
+  {
+    NamedField id("annotations", true);
+    visitor->do_oop(&id, annotations_offset(), true);
+  }
+
   { // access flags
     char buff[1024];
     access_flags().print_to_buffer(buff, AccessFlags::METHOD_FLAGS);
@@ -2910,6 +2915,8 @@ int Method::generate_fieldmap(TypeArray* field_map) {
   //thrown exceptions
   field_map->byte_at_put(map_index++, T_OBJECT);
 #endif
+  //annotations
+  field_map->byte_at_put(map_index++, T_OBJECT);
   //access_flags
   field_map->byte_at_put(map_index++, T_SHORT);
   //holder_id
@@ -2976,6 +2983,7 @@ void Method::iterate_oopmaps(oopmaps_doer do_map, void* param) {
 #if USE_REFLECTION
   OOPMAP_ENTRY_4(do_map, param, T_OBJECT, thrown_exceptions);
 #endif
+  OOPMAP_ENTRY_4(do_map, param, T_OBJECT, annotations);
   OOPMAP_ENTRY_4(do_map, param, T_SHORT,  access_flags);
   OOPMAP_ENTRY_4(do_map, param, T_SHORT,  holder_id);
   OOPMAP_ENTRY_4(do_map, param, T_SHORT,  max_execution_stack_count);

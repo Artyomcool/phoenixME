@@ -1202,6 +1202,30 @@ void Scheduler::master_mode_wait_for_event_or_timer(jlong sleep_time) {
   }
 }
 
+extern "C" void slave_mode_yield() {
+    Scheduler::set_timer_tick();
+    Thread::timer_tick();
+    Scheduler::slave_mode_wait_for_event_or_timer(0);
+}
+
+extern "C" int java_sp(JVMSPI_ThreadID thread_id) {
+  UsingFastOops fast_oops;
+  Thread::Fast thread = (OopDesc*) thread_id;
+  return thread().last_java_sp() - thread().stack_base();
+}
+
+extern "C" jint thread_stack_pointer() {
+    return Thread::current()->stack_pointer();
+}
+
+extern "C" void set_thread_stack_pointer(jint value) {
+  return Thread::current()->set_stack_pointer(value);
+}
+
+extern "C" void set_thread_result(jint value) {
+  Thread::current()->int_field_put(Thread::int1_value_offset(), value);
+}
+
 void Scheduler::slave_mode_wait_for_event_or_timer(jlong sleep_time) {
 
   if (JavaDebugger::is_debugger_option_on()) {
@@ -1616,6 +1640,10 @@ void *Scheduler::get_blocked_thread_data(int *data_size) {
     When primoridal_to_current_thread() returns, we may be in a different
     Java thread, and the GC will be very confused.
 */
+
+extern "C" bool has_last_handle() {
+  return _last_handle != NULL;
+}
 
 jlong Scheduler::time_slice(JVM_SINGLE_ARG_TRAPS) {
   GUARANTEE(is_slave_mode(), "sanity");

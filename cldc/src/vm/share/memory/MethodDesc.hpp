@@ -192,6 +192,7 @@ class MethodDesc: public OopDesc {
 #if USE_REFLECTION
   TypeArrayDesc* _thrown_exceptions;
 #endif
+  OopDesc * _annotations;
 
   jushort     _access_flags;       // Access flags
 

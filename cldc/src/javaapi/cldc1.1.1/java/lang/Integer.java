@@ -584,4 +584,8 @@ public final class Integer {
         return false;
     }
 
+    public static Integer valueOf(int i) {
+        return new Integer(i);
+    }
+
 }

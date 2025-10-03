@@ -282,6 +282,11 @@ KNIEXPORT jint KNI_GetIntField(jobject objectHandle, jfieldID fieldID) {
   return *object->int_field_addr((int)fieldID);
 }
 
+extern "C" void* get_object_first_field_address(jobject objectHandle) {
+  OopDesc* object = kni_read_handle(objectHandle);
+  return (void*)(((char*)object) + 4);
+}
+
 //
 // String operations
 //
@@ -474,6 +479,10 @@ static inline address _KNI_GetRawArrayRegion_start_address(jarray src,
   return (ta_start);
 }
 
+extern "C" void* array_start_address(jarray src) {
+  return _KNI_GetRawArrayRegion_start_address(src, 0);
+}
+
 KNIEXPORT void KNI_GetRawArrayRegion(jarray arrayHandle, jsize offset,
                                      jsize n, jbyte* dstBuffer) {
   address ta_start = _KNI_GetRawArrayRegion_start_address(arrayHandle, offset);
@@ -493,6 +502,10 @@ KNIEXPORT void KNI_SetRawArrayRegion(jarray arrayHandle, jsize offset,
 static inline address parameter_address(const int index) {
   return _kni_parameter_base +
      index * JavaStackDirection * BytesPerStackElement;
+}
+
+extern "C" void* get_parameter_address() {
+  return parameter_address(1);
 }
 
 KNIEXPORT jboolean KNI_GetParameterAsBoolean(jint index) {

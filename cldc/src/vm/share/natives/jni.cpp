@@ -39,7 +39,7 @@
   template(jfloat,   Float,   FLOAT) \
   template(jdouble,  Double,  DOUBLE)
 
-#define FOR_ALL_TYPES(template) \
+#define FOR_ALL_TYPES_T(template) \
   FOR_ALL_PRIMITIVE_TYPES(template) \
   template(jobject,  Object,  OBJECT)
 
@@ -649,7 +649,7 @@ _JNI_Set ## Type ## Field(JNIEnv *env, jobject obj, jfieldID fieldID, \
   KNI_Set ## Type ## Field(obj, fieldID, val); \
 }
 
-FOR_ALL_TYPES(DEFINE_SET_INSTANCE_FIELD)
+FOR_ALL_TYPES_T(DEFINE_SET_INSTANCE_FIELD)
 
 static jmethodID
 _JNI_GetStaticMethodID(JNIEnv *env, jclass clazz, 
@@ -841,6 +841,226 @@ new_entry_activation(JNIEnv *env, jobject obj, jclass cls, jmethodID methodID,
 
   return Universe::new_entry_activation(&method, param_size 
                                         JVM_NO_CHECK_AT_BOTTOM);
+}
+
+extern "C" int activation_method_index(jclass clazz, const char* name, const char* signature) {
+  SETUP_ERROR_CHECKER_ARG;
+  UsingFastOops fast_oops;
+
+  JavaClassObj::Fast class_mirror = *decode_handle(clazz);
+  InstanceClass::Fast ic = class_mirror().java_class();
+
+  Symbol::Fast n = SymbolTable::symbol_for(name JVM_CHECK_0);
+  Symbol::Fast s = TypeSymbol::parse(signature JVM_CHECK_0);
+
+  Method::Fast m = ic().lookup_method(&n, &s, /*non-static only*/ false);
+  
+  return m().method_table_index();
+}
+
+extern "C" int first_method_index(jclass clazz, const char* method_name) {
+  SETUP_ERROR_CHECKER_ARG;
+  UsingFastOops fast_oops;
+
+  JavaClassObj::Fast class_mirror = *decode_handle(clazz);
+  if (class_mirror.is_null()) {
+    return -1;
+  }
+  JavaClass::Fast jc = class_mirror().java_class();
+  InstanceClass::Fast ic = jc.obj();
+
+  Symbol::Fast method_name_symbol = SymbolTable::symbol_for(method_name JVM_CHECK_0);
+
+  ObjArray::Raw methods = ic().methods();
+  const int methods_length = methods().length();
+
+  for (int i = 0; i < methods_length; i++) {
+    Method::Fast method = methods().obj_at(i);
+    Symbol::Fast name = method().name();
+    if (name.equals(&method_name_symbol)) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+extern "C" const char* className(jclass clazz) {
+  UsingFastOops fast_oops;
+  JavaClassObj::Fast class_mirror = *decode_handle(clazz);
+  JavaClass::Fast jc = class_mirror().java_class();
+  Symbol::Fast class_name = jc().name();
+  return class_name().base_address();
+}
+
+extern "C" int methods_args_count(jclass clazz, int method_index) {
+  SETUP_ERROR_CHECKER_ARG;
+  UsingFastOops fast_oops;
+
+  JavaClassObj::Fast class_mirror = *decode_handle(clazz);
+  InstanceClass::Fast ic = class_mirror().java_class();
+  ObjArray::Raw methods = ic().methods();
+
+  Method::Fast method = methods().obj_at(method_index);
+
+  return method().compute_size_of_parameters();
+}
+
+extern "C" jobject new_entry_activation_api(JNIEnv* jniEnv, jclass clazz, int method_index) {
+  SETUP_ERROR_CHECKER_ARG;
+  UsingFastOops fast_oops;
+  
+  JavaClassObj::Fast class_mirror = *decode_handle(clazz);
+  InstanceClass::Fast ic = class_mirror().java_class();
+  ObjArray::Raw methods = ic().methods();
+
+  Method::Fast method = methods().obj_at(method_index);
+
+  int size = method().compute_size_of_parameters();
+  EntryActivation::Fast obj = Universe::new_entry_activation(&method, size JVM_NO_CHECK_AT_BOTTOM);
+
+  return new_local_ref_for_oop(jniEnv, &obj);
+}
+
+extern "C" void bind_entry_int(jobject entry, int i, jint v) {
+  UsingFastOops fast_oops;
+
+  EntryActivation::Fast fe = *decode_handle(entry);
+  fe().int_at_put(i, v);
+}
+
+extern "C" void bind_entry_long(jobject entry, int i, jlong v) {
+  UsingFastOops fast_oops;
+  
+  EntryActivation::Fast fe = *decode_handle(entry);
+  fe().long_at_put(i, v);
+}
+
+extern "C" void bind_entry_float(jobject entry, int i, jfloat v) {
+  UsingFastOops fast_oops;
+  
+  EntryActivation::Fast fe = *decode_handle(entry);
+  fe().float_at_put(i, v);
+}
+
+extern "C" void bind_entry_double(jobject entry, int i, jdouble v) {
+  UsingFastOops fast_oops;
+  
+  EntryActivation::Fast fe = *decode_handle(entry);
+  fe().double_at_put(i, v);
+}
+
+extern "C" void bind_entry_obj(jobject entry, int i, jobject v) {
+  UsingFastOops fast_oops;
+  
+  EntryActivation::Fast fe = *decode_handle(entry);
+  Oop::Raw oop;
+  if (v != NULL) {
+    oop = *decode_handle(v);
+  }
+  fe().obj_at_put(i, &oop);
+}
+
+extern "C" void bind_entry_str(jobject entry, int i, const char* ptr, int len) {
+  SETUP_ERROR_CHECKER_ARG;
+  UsingFastOops fast_oops;
+  
+  EntryActivation::Fast fe = *decode_handle(entry);
+  String::Fast s = Universe::new_string(ptr, len JVM_NO_CHECK);
+  
+  fe().obj_at_put(i, &s);
+}
+
+extern "C" void entry_result_int(jobject entry) {
+  UsingFastOops fast_oops;
+  
+  EntryActivation::Fast fe = *decode_handle(entry);
+  fe().set_return_point((address) invoke_entry_word_return);
+}
+
+extern "C" void invoke_entry(jobject e) {
+  UsingFastOops fast_oops;
+  
+  EntryActivation::Fast entry = *decode_handle(e);
+
+  OopDesc* next = Thread::current()->pending_entries();
+  if (next) {
+    EntryActivation::Raw current = next;
+    entry().set_next(&current);
+  }
+  Thread::current()->set_pending_entries(&entry);
+}
+
+extern "C" jint class_methods_count(jclass clazz) {
+  SETUP_ERROR_CHECKER_ARG;
+  UsingFastOops fast_oops;
+
+  JavaClassObj::Fast class_mirror = *decode_handle(clazz);
+  if (class_mirror.is_null()) {
+    return 0;
+  }
+  JavaClass::Fast jc = class_mirror().java_class();
+  InstanceClass::Fast ic = jc.obj();
+  ObjArray::Raw methods = ic().methods();
+
+  return methods().length();
+}
+
+extern "C" jarray annotations_for_method(jclass clazz, int method_index) {
+  SETUP_ERROR_CHECKER_ARG;
+  UsingFastOops fast_oops;
+
+  JavaClassObj::Fast class_mirror = *decode_handle(clazz);
+  if (class_mirror.is_null()) {
+    return NULL;
+  }
+  JavaClass::Fast jc = class_mirror().java_class();
+  InstanceClass::Fast ic = jc.obj();
+  ObjArray::Raw methods = ic().methods();
+
+  Method::Fast method = methods().obj_at(method_index);
+  ObjArray::Raw annotations = method().annotations();
+  if (annotations.is_null() || annotations().length() == 0) {
+    return NULL;
+  }
+
+  return (jarray)ObjectHeap::register_local_reference(&annotations);
+}
+
+extern "C" jint cp_int(jclass clazz, jshort index) {
+  SETUP_ERROR_CHECKER_ARG;
+  UsingFastOops fast_oops;
+
+  JavaClassObj::Fast class_mirror = *decode_handle(clazz);
+  if (class_mirror.is_null()) {
+    return 0;
+  }
+  JavaClass::Fast jc = class_mirror().java_class();
+  InstanceClass::Fast ic = jc.obj();
+
+  ConstantPool::Fast cp = ic().constants();
+  return cp().int_at(index);
+}
+
+extern "C" bool cp_utf8_is(jclass clazz, jshort index, const char* str) {
+  SETUP_ERROR_CHECKER_ARG;
+  UsingFastOops fast_oops;
+
+  JavaClassObj::Fast class_mirror = *decode_handle(clazz);
+  if (class_mirror.is_null()) {
+    return 0;
+  }
+  JavaClass::Fast jc = class_mirror().java_class();
+  InstanceClass::Fast ic = jc.obj();
+
+  ConstantPool::Fast cp = ic().constants();
+  TypeArray::Fast s = cp().symbol_at(index);
+
+  for (int i=0, len=s().length(); i < len; i++) {
+    if (str[i] != s().byte_at(i)) return false;
+  }
+  
+  return str[s().length()] == 0;
 }
 
 static ReturnOop 
@@ -1249,7 +1469,7 @@ _JNI_SetStatic ## Type ## Field(JNIEnv *env, jclass clazz, jfieldID fieldID, \
   _JNI_DeleteLocalRef(env, holder);                                     \
 }
 
-FOR_ALL_TYPES(DEFINE_SET_STATIC_FIELD)
+FOR_ALL_TYPES_T(DEFINE_SET_STATIC_FIELD)
 
 static jstring JNICALL
 _JNI_NewString(JNIEnv *env, const jchar *unicode, jsize len) {

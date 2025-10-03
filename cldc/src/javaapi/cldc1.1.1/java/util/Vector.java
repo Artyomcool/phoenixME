@@ -559,6 +559,53 @@ class Vector {
         buf.append("]");
         return buf.toString();
     }
+
+    public synchronized Object get(int index) {
+        return elementAt(index);
+    }
+
+    public synchronized Object set(int index, Object element) {
+        if (index >= this.elementCount) {
+            throw new ArrayIndexOutOfBoundsException(index);
+        } else {
+            Object oldValue = this.elementData[index];
+            this.elementData[index] = element;
+            return oldValue;
+        }
+    }
+
+    public synchronized boolean add(Object e) {
+        addElement(e);
+        return true;
+    }
+
+    public boolean remove(Object o) {
+        return this.removeElement(o);
+    }
+
+    public void add(int index, Object element) {
+        this.insertElementAt(element, index);
+    }
+
+    public synchronized Object remove(int index) {
+        if (index >= this.elementCount) {
+            throw new ArrayIndexOutOfBoundsException(index);
+        } else {
+            Object oldValue = this.elementData[index];
+            int numMoved = this.elementCount - index - 1;
+            if (numMoved > 0) {
+                System.arraycopy(this.elementData, index + 1, this.elementData, index, numMoved);
+            }
+
+            this.elementData[--this.elementCount] = null;
+            return oldValue;
+        }
+    }
+
+    public void clear() {
+        this.removeAllElements();
+    }
+
 }
 
 final

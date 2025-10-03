@@ -160,10 +160,10 @@ private:
   }
 
 #define NORMAL_QUEUE_VALUE (1 << ThreadObj::PRIORITY_NORMAL)
-
+public:
   static void add_to_asynchronous(Thread* thread);
   static void remove_from_asynchronous(Thread* thread);
-
+private:
   static ReturnOop add_waiting_thread(Thread* thread, JavaOop *obj);
   static ReturnOop add_sync_thread(Thread* thread, Thread *pending_waiters,
                                    JavaOop *obj);
@@ -201,9 +201,6 @@ private:
   }
 #endif
 
-  static void master_mode_wait_for_event_or_timer(jlong sleep_time);
-  static void slave_mode_wait_for_event_or_timer(jlong sleep_time);
-
   static void oops_doer(Thread* thread, void do_oop(OopDesc**));
 
   static OopDesc* _gc_global_head;
@@ -230,6 +227,8 @@ private:
   inline static void switch_thread_master_mode(Thread *next_thread, 
                                                Thread* thread JVM_TRAPS);
  public:
+  static void master_mode_wait_for_event_or_timer(jlong sleep_time);
+  static void slave_mode_wait_for_event_or_timer(jlong sleep_time);
   static void set_timer_tick() {
     _timer_has_ticked = true;
   }

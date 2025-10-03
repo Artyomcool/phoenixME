@@ -56,6 +56,14 @@ void SNI_UnblockThread(JVMSPI_ThreadID thread_id) {
   Scheduler::unblock_thread(&thread);
 }
 
+extern "C" void resume_thread_no_unblock(JVMSPI_ThreadID thread_id) {
+  UsingFastOops fast_oops;
+  Thread::Fast thread = (OopDesc*) thread_id;
+  thread().set_async_redo(0);
+  Scheduler::remove_from_asynchronous(&thread);
+  Scheduler::add_to_active(&thread);
+}
+
 JVMSPI_BlockedThreadInfo *SNI_GetBlockedThreads(int *number_of_blocked_threads) {
   return Scheduler::get_blocked_threads(number_of_blocked_threads);
 }

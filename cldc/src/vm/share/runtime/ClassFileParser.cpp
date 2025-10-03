@@ -971,6 +971,7 @@ ClassFileParser::parse_method(ClassParserState *state, ConstantPool* cp,
   bool is_code_required = !access_flags.is_native_or_abstract();
   bool parsed_checked_exceptions_attribute = false;
   ObjArray::Fast stackmaps;
+  ObjArray::Fast annotations;
 
 #if USE_REFLECTION
   TypeArray::Fast thrown_exceptions;
@@ -1029,6 +1030,22 @@ ClassFileParser::parse_method(ClassParserState *state, ConstantPool* cp,
     } else if (method_attribute_name.equals(Symbols::tag_synthetic())) {
       // Should we check that there hasn't already been a synthetic attribute?
       access_flags.set_is_synthetic();
+    } else if (method_attribute_name.equals(Symbols::tag_runtime_annotations())) {
+      if (annotations.is_null()) {
+        annotations = Universe::new_obj_array(2 JVM_CHECK_0);
+      }
+      TypeArray::Fast raw = Universe::new_byte_array(method_attribute_length JVM_CHECK_0);
+      jvm_memcpy(raw().base_address(), raw_u1_buffer(get_buffer_position()), method_attribute_length);
+      annotations().obj_at_put(0, &raw);
+      skip_u1(method_attribute_length JVM_CHECK_0);
+    } else if (method_attribute_name.equals(Symbols::tag_runtime_parameter_annotations())) {
+      if (annotations.is_null()) {
+        annotations = Universe::new_obj_array(2 JVM_CHECK_0);
+      }
+      TypeArray::Fast raw = Universe::new_byte_array(method_attribute_length JVM_CHECK_0);
+      jvm_memcpy(raw().base_address(), raw_u1_buffer(get_buffer_position()), method_attribute_length);
+      annotations().obj_at_put(1, &raw);
+      skip_u1(method_attribute_length JVM_CHECK_0);
     } else {
       // Skip unknown attributes
       skip_u1(method_attribute_length JVM_CHECK_0);
@@ -1145,6 +1162,7 @@ ClassFileParser::parse_method(ClassParserState *state, ConstantPool* cp,
   if (ENABLE_BYTECODE_FLUSHING && code_length > 0) {
     m().code_flush_icache();
   }
+  m().set_annotations(&annotations);
   return m;
 }
 
@@ -2030,7 +2048,8 @@ ReturnOop ClassFileParser::parse_class_internal(ClassParserState *stack JVM_TRAP
   }
 #endif
 
-  remove_unused_utf8_entries(&cp);
+  // fixme removes annotations stuff, probably need to parse them eager(
+  // remove_unused_utf8_entries(&cp);
 
   // completed loading of the top stack element
   stack->pop();
